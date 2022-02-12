@@ -1,6 +1,8 @@
 package games.wordle;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -27,17 +30,16 @@ public class Wordle {
 		printPrompt();
 		console.openConsole();
 		
-		for (int i = 0; i < 6; i++) {
+		boolean wordGuessed = false;
+		for (int i = 0; i < 6 && !wordGuessed; i++) {
 			String input = getUserInput();
 		    List<WordleCharacter> results = makeGuess(input);
 			printGuess(results);
-			if (isWordGuessed(input)) {
-				console.print("Impressive");
-				return;
-			}
+			wordGuessed = isWordGuessed(input);
 		}
 
-		console.print("The word was " + word.toUpperCase() + ".");
+		printEnding(wordGuessed);
+		writeWordToFile();
 	}
 
 	private void chooseWord() {
@@ -134,5 +136,17 @@ public class Wordle {
 			frequencies.put(character, frequencies.getOrDefault(character, 0) + 1);
 		}
 		return frequencies;
+	}
+
+	private void printEnding(boolean wordGuessed) {
+		if (wordGuessed)
+			console.print("Impressive");
+		else
+			console.print("The word was " + word.toUpperCase() + ".");
+	}
+
+	private void writeWordToFile() throws IOException {
+		File file = new File("previous_word.txt");
+		FileUtils.writeStringToFile(file, word.toUpperCase(), StandardCharsets.UTF_8);
 	}
 }
