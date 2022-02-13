@@ -3,6 +3,8 @@ package games.wordle;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +44,17 @@ public class Wordle {
 		writeWordToFile();
 	}
 
-	private void chooseWord() {
+	private void chooseWord() throws IOException {
 		if (StringUtils.isBlank(word)) {
 		    this.word = dictionary.getRandomWord();
+		    
+		    if (Files.exists(Paths.get("previous_word.txt"))) {
+				File file = new File("previous_word.txt");
+				String previousWord = FileUtils.readFileToString(file, StandardCharsets.UTF_8).toLowerCase();
+				while (word.equals(previousWord)) {
+				    this.word = dictionary.getRandomWord();
+				}
+		    }
 		}
 	}
 	
